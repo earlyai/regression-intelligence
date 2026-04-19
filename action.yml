@@ -130,6 +130,7 @@ runs:
     - name: Run early ${{ inputs.command }}
       shell: bash
       env:
+        LOG_CONSOLE: "true"
         API_KEY: ${{ inputs.api-key }}
         TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
         BASE_HOST: ${{ steps.resolve.outputs.base_host }}
