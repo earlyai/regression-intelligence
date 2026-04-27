@@ -32,7 +32,7 @@ inputs:
     required: false
     default: ''
   catalog-id:
-    description: 'Existing catalog UUID to pass to the CLI (exposed as CATALOG_ID).'
+    description: 'Existing catalog id to pass to the CLI (exposed as CATALOG_ID).'
     required: false
     default: ''
   base-host:
@@ -46,7 +46,7 @@ inputs:
 
 outputs:
   catalog-id:
-    description: 'Catalog UUID printed by the CLI when running generate-catalog.'
+    description: 'Catalog id printed by the CLI when running generate-catalog.'
     value: ${{ steps.run-cli.outputs.catalog-id }}
 
 runs:
@@ -156,11 +156,11 @@ runs:
         log_file="$(mktemp)"
         early "$COMMAND" 2>&1 | tee "$log_file"
         if [[ "$COMMAND" == "generate-catalog" ]]; then
-          catalog_id=$(grep -oiE 'catalog id:[[:space:]]*[0-9a-f-]{36}' "$log_file" | tail -n1 | awk '{print $NF}')
+          catalog_id=$(grep -oiE 'catalog id:[[:space:]]*[0-9a-z]{20,40}' "$log_file" | tail -n1 | awk '{print $NF}')
           if [[ -n "$catalog_id" ]]; then
             echo "catalog-id=$catalog_id" >> "$GITHUB_OUTPUT"
             echo "Captured catalog-id=$catalog_id"
           else
-            echo "::warning::generate-catalog did not print a 'catalog id: <uuid>' line; catalog-id output will be empty."
+            echo "::warning::generate-catalog did not print a 'catalog id: <id>' line; catalog-id output will be empty."
           fi
         fi
