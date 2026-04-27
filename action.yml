@@ -31,6 +31,10 @@ inputs:
     description: 'generate-impact: base branch to compare against (default: master). generate-catalog: branch or tag to checkout and analyze (default: github.ref_name).'
     required: false
     default: ''
+  catalog-id:
+    description: 'Existing catalog UUID to pass to the CLI (exposed as CATALOG_ID).'
+    required: false
+    default: ''
   base-host:
     description: 'API base host. If omitted, derived from cli-build (qa -> https://api-qa.startearly.ai, prod -> https://api.startearly.ai).'
     required: false
@@ -146,6 +150,7 @@ runs:
         COMPARE_BRANCH: ${{ inputs.compare_branch }}
         LABEL: ${{ inputs.label }}
         ANCHOR_BRANCH: ${{ steps.resolve.outputs.anchor }}
+        CATALOG_ID: ${{ inputs.catalog-id }}
       run: |
         set -o pipefail
         log_file="$(mktemp)"
