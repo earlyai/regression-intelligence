@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/earlyai/regression-intelligence/compare/v1.0.1...v1.1.0) (2026-04-27)
+
+
+### Features
+
+* expose catalog-id output from generate-catalog ([6b649f1](https://github.com/earlyai/regression-intelligence/commit/6b649f1c347ba1ec22be3765a6705b6de8069024))
+
+
+### Bug Fixes
+
+* accept catalog id ([1a0bc89](https://github.com/earlyai/regression-intelligence/commit/1a0bc89630a152cf2a9fd3c2fc2e160e713e29fc))
+* identify cuid ([4cda35e](https://github.com/earlyai/regression-intelligence/commit/4cda35e28a9d542bf5be4917dd51b2c005f29f24))
+
 ## [1.0.1](https://github.com/earlyai/regression-intelligence/compare/v1.0.0...v1.0.1) (2026-04-19)
 
 
