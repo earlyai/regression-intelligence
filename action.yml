@@ -40,6 +40,11 @@ inputs:
     required: false
     default: '--max-old-space-size=5120'
 
+outputs:
+  catalog-id:
+    description: 'Catalog UUID printed by the CLI when running generate-catalog.'
+    value: ${{ steps.run-cli.outputs.catalog-id }}
+
 runs:
   using: 'composite'
   steps:
@@ -128,8 +133,10 @@ runs:
       run: npm install -g @earlyai/cli@latest
 
     - name: Run early ${{ inputs.command }}
+      id: run-cli
       shell: bash
       env:
+        COMMAND: ${{ inputs.command }}
         LOG_CONSOLE: "true"
         API_KEY: ${{ inputs.api-key }}
         TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
@@ -139,4 +146,16 @@ runs:
         COMPARE_BRANCH: ${{ inputs.compare_branch }}
         LABEL: ${{ inputs.label }}
         ANCHOR_BRANCH: ${{ steps.resolve.outputs.anchor }}
-      run: early ${{ inputs.command }}
+      run: |
+        set -o pipefail
+        log_file="$(mktemp)"
+        early "$COMMAND" 2>&1 | tee "$log_file"
+        if [[ "$COMMAND" == "generate-catalog" ]]; then
+          catalog_id=$(grep -oiE 'catalog id:[[:space:]]*[0-9a-f-]{36}' "$log_file" | tail -n1 | awk '{print $NF}')
+          if [[ -n "$catalog_id" ]]; then
+            echo "catalog-id=$catalog_id" >> "$GITHUB_OUTPUT"
+            echo "Captured catalog-id=$catalog_id"
+          else
+            echo "::warning::generate-catalog did not print a 'catalog id: <uuid>' line; catalog-id output will be empty."
+          fi
+        fi
