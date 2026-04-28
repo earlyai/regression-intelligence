@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/earlyai/regression-intelligence/compare/v1.1.0...v1.2.0) (2026-04-28)
+
+
+### Features
+
+* accept optional job-id input and expose as EARLY_JOB_ID ([1b2a77b](https://github.com/earlyai/regression-intelligence/commit/1b2a77b09eaf5caced2cc880c88a67fa20a91d10))
+* accept optional job-id input, pass as EARLY_JOB_ID ([fc3a39e](https://github.com/earlyai/regression-intelligence/commit/fc3a39e5ea671fcc458ce58b8fecc68844763b41))
+
 ## [1.1.0](https://github.com/earlyai/regression-intelligence/compare/v1.0.1...v1.1.0) (2026-04-27)
 
 
