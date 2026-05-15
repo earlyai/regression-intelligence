@@ -39,6 +39,14 @@ inputs:
     description: 'Existing job id to pass to the CLI (exposed as EARLY_JOB_ID).'
     required: false
     default: ''
+  project-id:
+    description: 'Resolved project UUID (debug meta — exposed as EARLY_PROJECT_ID).'
+    required: false
+    default: ''
+  project-root-path:
+    description: 'Project logical root path, e.g. ./apps/call-graph (debug meta — exposed as EARLY_PROJECT_ROOT_PATH).'
+    required: false
+    default: ''
   base-host:
     description: 'API base host. If omitted, derived from cli-build (qa -> https://api-qa.startearly.ai, prod -> https://api.startearly.ai).'
     required: false
@@ -156,6 +164,8 @@ runs:
         ANCHOR_BRANCH: ${{ steps.resolve.outputs.anchor }}
         CATALOG_ID: ${{ inputs.catalog-id }}
         EARLY_JOB_ID: ${{ inputs.job-id }}
+        EARLY_PROJECT_ID: ${{ inputs.project-id }}
+        EARLY_PROJECT_ROOT_PATH: ${{ inputs.project-root-path }}
       run: |
         set -o pipefail
         log_file="$(mktemp)"
