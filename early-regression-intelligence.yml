@@ -2,7 +2,6 @@ name: Early Regression Intelligence
 
 permissions:
   contents: read
-  packages: read
 
 on:
   workflow_dispatch:
@@ -29,14 +28,6 @@ on:
         description: "Existing catalog id to reuse/sync (optional)"
         required: false
         default: ""
-      cli-build:
-        description: "qa or prod"
-        required: true
-        type: choice
-        options:
-          - qa
-          - prod
-        default: qa
       job-id:
         description: "Dispatch job identifier (set by backend; updates an existing workflow run)"
         required: false
@@ -58,12 +49,10 @@ jobs:
         uses: earlyai/regression-intelligence@v1
         with:
           command: ${{ inputs.command }}
-          api-key: ${{ inputs.cli-build == 'qa' && secrets.EARLY_AGENT_API_KEY_QA || secrets.EARLY_AGENT_API_KEY_PROD }}
-          cli-build: ${{ inputs.cli-build }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          api-key: ${{ secrets.EARLY_AGENT_API_KEY }}
+          anchor_branch: ${{ inputs.anchor_branch }}
           compare_branch: ${{ inputs.compare_branch }}
           label: ${{ inputs.label }}
-          anchor_branch: ${{ inputs.anchor_branch }}
           catalog-id: ${{ inputs.catalog-id }}
           job-id: ${{ inputs.job-id }}
           project-id: ${{ inputs.project-id }}

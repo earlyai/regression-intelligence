@@ -11,7 +11,6 @@ name: Early Regression Intelligence
 
 permissions:
   contents: read
-  packages: read
 
 on:
   workflow_dispatch:
@@ -38,14 +37,6 @@ on:
         description: "Existing catalog id to reuse/sync (optional)"
         required: false
         default: ""
-      cli-build:
-        description: "qa or prod"
-        required: true
-        type: choice
-        options:
-          - qa
-          - prod
-        default: qa
       job-id:
         description: "Dispatch job identifier (set by backend)"
         required: false
@@ -67,12 +58,10 @@ jobs:
         uses: earlyai/regression-intelligence@v1
         with:
           command: ${{ inputs.command }}
-          api-key: ${{ inputs.cli-build == 'qa' && secrets.EARLY_AGENT_API_KEY_QA || secrets.EARLY_AGENT_API_KEY_PROD }}
-          cli-build: ${{ inputs.cli-build }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          api-key: ${{ secrets.EARLY_AGENT_API_KEY }}
+          anchor_branch: ${{ inputs.anchor_branch }}
           compare_branch: ${{ inputs.compare_branch }}
           label: ${{ inputs.label }}
-          anchor_branch: ${{ inputs.anchor_branch }}
           catalog-id: ${{ inputs.catalog-id }}
           job-id: ${{ inputs.job-id }}
           project-id: ${{ inputs.project-id }}
@@ -94,8 +83,8 @@ Both shorthand (`catalog`, `impact`) and long-form (`generate-catalog`, `generat
 |-------|----------|---------|-------------|
 | `command` | Yes | | `catalog` or `impact` |
 | `api-key` | Yes | | EarlyAI API key |
-| `cli-build` | No | `prod` | `qa` or `prod` |
-| `github-token` | No | `github.token` | Token for GitHub Packages (`read:packages`). Only needed for `qa` builds; `prod` installs from the public npm registry. |
+| `cli-build` | No | `prod` | `qa` or `prod`. QA installs from GitHub Packages (requires `github-token`); prod installs from public npm. |
+| `github-token` | No | `github.token` | Token for GitHub Packages (`read:packages`). Only needed for `qa` builds. |
 | `compare_branch` | No | | Branch to analyze. Required for `impact`. |
 | `label` | No | | Human-readable label for the run. Used by `impact`. |
 | `anchor_branch` | No | | `impact`: base branch to compare against (default: `master`). `catalog`: branch/tag to checkout (default: triggering ref). |
@@ -114,13 +103,9 @@ Both shorthand (`catalog`, `impact`) and long-form (`generate-catalog`, `generat
 
 ## Secrets
 
-The example workflow expects these repository secrets:
-
 | Secret | Description |
 |--------|-------------|
-| `EARLY_AGENT_API_KEY_QA` | EarlyAI API key for the QA environment. |
-| `EARLY_AGENT_API_KEY_PROD` | EarlyAI API key for the production environment. |
-| `GITHUB_TOKEN` | Automatically provided by GitHub Actions. Used to install `@earlyai/cli` from GitHub Packages (QA builds only; prod installs from public npm). |
+| `EARLY_AGENT_API_KEY` | EarlyAI API key for the production environment. |
 
 ## Versioning
 

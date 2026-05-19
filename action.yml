@@ -134,19 +134,22 @@ runs:
       with:
         node-version: 20
 
+    - name: Configure GitHub Packages registry (QA only)
+      if: ${{ inputs.cli-build == 'qa' }}
+      uses: actions/setup-node@v4
+      with:
+        registry-url: 'https://npm.pkg.github.com'
+        scope: '@earlyai'
+        always-auth: true
+
     - name: Install @earlyai/cli
       shell: bash
       env:
+        NODE_AUTH_TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
         CLI_BUILD: ${{ inputs.cli-build }}
-        GH_TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
       run: |
-        if [[ "$CLI_BUILD" == "qa" ]]; then
-          echo "@earlyai:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=$GH_TOKEN" >> ~/.npmrc
-          npm install -g @earlyai/cli@qa
-        else
-          npm install -g @earlyai/cli@latest
-        fi
+        TAG=$([[ "$CLI_BUILD" == "qa" ]] && echo "qa" || echo "latest")
+        npm install -g "@earlyai/cli@$TAG"
 
     - name: Run early ${{ steps.validate.outputs.command }}
       id: run-cli
