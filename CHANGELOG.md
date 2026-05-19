@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.0](https://github.com/earlyai/regression-intelligence/compare/v1.2.0...v1.3.0) (2026-05-19)
+
+
+### Features
+
+* accept project-id and project-root-path inputs ([11e2caf](https://github.com/earlyai/regression-intelligence/commit/11e2cafba5656c231bc5927dc4959dca0a07ffa9))
+* accept project-id and project-root-path inputs ([5057fce](https://github.com/earlyai/regression-intelligence/commit/5057fce59f975ee2bfceb97380bddd15e96c0fd1))
+* accept shorthand catalog/impact command aliases ([e88390f](https://github.com/earlyai/regression-intelligence/commit/e88390f7f9c46f19e6ee5257256d4c66e664f4c3))
+* collapse example workflow to single job ([59d2a86](https://github.com/earlyai/regression-intelligence/commit/59d2a8612610d31816d827a6216afd03ffc8e3da))
+* install prod CLI from public npm, QA from GitHub Packages ([18fbbc3](https://github.com/earlyai/regression-intelligence/commit/18fbbc32f44b810ebbc21e22b87ae3715e977d8a))
+* productionize action — shorthand commands, single job, consolidated install ([bb9fd37](https://github.com/earlyai/regression-intelligence/commit/bb9fd3795fc0fb0840e2864830c39b7420d7674a))
+* remove cli-build and github-token inputs from prod action ([5ca1cea](https://github.com/earlyai/regression-intelligence/commit/5ca1ceae58922b644ce4f8181f1f3c45ae77f346))
+* restore cli-build and github-token inputs in action ([02f758c](https://github.com/earlyai/regression-intelligence/commit/02f758c58d0c823b14b9c548d5ff66662ba47848))
+* use setup-node for QA registry, simplify example for prod users ([2ce4087](https://github.com/earlyai/regression-intelligence/commit/2ce4087aa6fd823d1667517169162024364e0cbd))
+
 ## [1.2.0](https://github.com/earlyai/regression-intelligence/compare/v1.1.0...v1.2.0) (2026-04-28)
 
 
