@@ -20,7 +20,7 @@ inputs:
     required: false
     default: ''
   compare_branch:
-    description: 'Branch to analyze. Required when command is generate-impact.'
+    description: 'Branch to analyze. Required when command is impact (or generate-impact).'
     required: false
     default: ''
   label:
@@ -28,7 +28,7 @@ inputs:
     required: false
     default: ''
   anchor_branch:
-    description: 'generate-impact: base branch to compare against (default: master). generate-catalog: branch or tag to checkout and analyze (default: github.ref_name).'
+    description: 'impact: base branch to compare against (default: master). catalog: branch or tag to checkout and analyze (default: github.ref_name).'
     required: false
     default: ''
   catalog-id:
