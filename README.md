@@ -80,8 +80,8 @@ Both shorthand (`catalog`, `impact`) and long-form (`generate-catalog`, `generat
 |-------|----------|---------|-------------|
 | `command` | Yes | | `catalog` or `impact` |
 | `api-key` | Yes | | EarlyAI API key |
-| `cli-build` | No | `prod` | `qa` or `prod`. QA installs from GitHub Packages (requires `github-token`); prod installs from public npm. |
-| `github-token` | No | `github.token` | Token for GitHub Packages (`read:packages`). Only needed for `qa` builds. |
+| `cli-build` | No | `prod` | CLI build to install. |
+| `github-token` | No | `github.token` | Token for GitHub Packages (`read:packages`). Not needed for prod. |
 | `compare_branch` | No | | Branch to analyze. Required for `impact`. |
 | `label` | No | | Human-readable label for the run. Used by `impact`. |
 | `anchor_branch` | No | | `impact`: base branch to compare against (default: `master`). `catalog`: branch/tag to checkout (default: triggering ref). |
