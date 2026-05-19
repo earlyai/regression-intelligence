@@ -59,10 +59,3 @@ jobs:
           tag_name: v${{ needs.release-please.outputs.major }}.${{ needs.release-please.outputs.minor }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Tag QA
-        uses: richardsimko/update-tag@v1
-        with:
-          tag_name: QA
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
