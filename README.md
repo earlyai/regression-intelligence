@@ -18,10 +18,7 @@ on:
       command:
         description: "catalog or impact"
         required: true
-        type: choice
-        options:
-          - catalog
-          - impact
+        type: string
       anchor_branch:
         description: "Baseline branch/tag"
         required: true
