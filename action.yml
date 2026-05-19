@@ -1,12 +1,12 @@
 name: 'EarlyAI CLI - Generate Impact or Catalog'
-description: 'Composite action that runs the EarlyAI CLI generate-impact or generate-catalog command.'
+description: 'Composite action that runs the EarlyAI CLI impact or catalog command.'
 branding:
   icon: 'package'
   color: 'blue'
 
 inputs:
   command:
-    description: 'Which CLI command to run: generate-impact or generate-catalog.'
+    description: 'Which CLI command to run: catalog (or generate-catalog), impact (or generate-impact).'
     required: true
   api-key:
     description: 'EarlyAI API key for the chosen environment (QA or Prod).'
@@ -64,7 +64,8 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Validate inputs
+    - name: Validate and normalize inputs
+      id: validate
       shell: bash
       env:
         COMMAND: ${{ inputs.command }}
@@ -72,8 +73,9 @@ runs:
         COMPARE_BRANCH: ${{ inputs.compare_branch }}
       run: |
         case "$COMMAND" in
-          generate-impact|generate-catalog) ;;
-          *) echo "::error::Invalid command '$COMMAND'. Must be 'generate-impact' or 'generate-catalog'." ; exit 1 ;;
+          catalog|generate-catalog) COMMAND="generate-catalog" ;;
+          impact|generate-impact)   COMMAND="generate-impact" ;;
+          *) echo "::error::Invalid command '$COMMAND'. Must be 'catalog', 'impact', 'generate-catalog', or 'generate-impact'." ; exit 1 ;;
         esac
         case "$CLI_BUILD" in
           qa|prod) ;;
@@ -83,12 +85,13 @@ runs:
           echo "::error::'compare_branch' is required when command is 'generate-impact'."
           exit 1
         fi
+        echo "command=$COMMAND" >> "$GITHUB_OUTPUT"
 
     - name: Resolve refs and host
       id: resolve
       shell: bash
       env:
-        COMMAND: ${{ inputs.command }}
+        COMMAND: ${{ steps.validate.outputs.command }}
         COMPARE_BRANCH: ${{ inputs.compare_branch }}
         ANCHOR_BRANCH: ${{ inputs.anchor_branch }}
         DEFAULT_REF: ${{ github.ref_name }}
@@ -148,11 +151,11 @@ runs:
         NODE_AUTH_TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
       run: npm install -g @earlyai/cli@latest
 
-    - name: Run early ${{ inputs.command }}
+    - name: Run early ${{ steps.validate.outputs.command }}
       id: run-cli
       shell: bash
       env:
-        COMMAND: ${{ inputs.command }}
+        COMMAND: ${{ steps.validate.outputs.command }}
         LOG_CONSOLE: "true"
         API_KEY: ${{ inputs.api-key }}
         TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
