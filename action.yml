@@ -48,7 +48,7 @@ inputs:
     required: false
     default: ''
   base-host:
-    description: 'API base host override. Derived from cli-build if omitted (qa -> https://api-qa.startearly.ai, prod -> https://api.startearly.ai).'
+    description: 'API base host override. Defaults to https://api.startearly.ai.'
     required: false
     default: ''
   node-options:
