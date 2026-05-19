@@ -9,16 +9,8 @@ inputs:
     description: 'Which CLI command to run: catalog (or generate-catalog), impact (or generate-impact).'
     required: true
   api-key:
-    description: 'EarlyAI API key for the chosen environment (QA or Prod).'
+    description: 'EarlyAI API key.'
     required: true
-  cli-build:
-    description: 'Which CLI build to install: qa or prod.'
-    required: false
-    default: 'prod'
-  github-token:
-    description: 'Token used to read @earlyai/cli from GitHub Packages (requires read:packages). Only needed for cli-build: qa. Prod installs from the public npm registry. Defaults to github.token; external QA consumers must pass a PAT.'
-    required: false
-    default: ''
   compare_branch:
     description: 'Branch to analyze. Required when command is impact (or generate-impact).'
     required: false
@@ -48,7 +40,7 @@ inputs:
     required: false
     default: ''
   base-host:
-    description: 'API base host. If omitted, derived from cli-build (qa -> https://api-qa.startearly.ai, prod -> https://api.startearly.ai).'
+    description: 'API base host override. Defaults to https://api.startearly.ai.'
     required: false
     default: ''
   node-options:
@@ -69,17 +61,12 @@ runs:
       shell: bash
       env:
         COMMAND: ${{ inputs.command }}
-        CLI_BUILD: ${{ inputs.cli-build }}
         COMPARE_BRANCH: ${{ inputs.compare_branch }}
       run: |
         case "$COMMAND" in
           catalog|generate-catalog) COMMAND="generate-catalog" ;;
           impact|generate-impact)   COMMAND="generate-impact" ;;
           *) echo "::error::Invalid command '$COMMAND'. Must be 'catalog', 'impact', 'generate-catalog', or 'generate-impact'." ; exit 1 ;;
-        esac
-        case "$CLI_BUILD" in
-          qa|prod) ;;
-          *) echo "::error::Invalid cli-build '$CLI_BUILD'. Must be 'qa' or 'prod'." ; exit 1 ;;
         esac
         if [[ "$COMMAND" == "generate-impact" && -z "$COMPARE_BRANCH" ]]; then
           echo "::error::'compare_branch' is required when command is 'generate-impact'."
@@ -96,7 +83,6 @@ runs:
         ANCHOR_BRANCH: ${{ inputs.anchor_branch }}
         DEFAULT_REF: ${{ github.ref_name }}
         BASE_HOST_INPUT: ${{ inputs.base-host }}
-        CLI_BUILD: ${{ inputs.cli-build }}
       run: |
         if [[ "$COMMAND" == "generate-impact" ]]; then
           checkout_ref="$COMPARE_BRANCH"
@@ -108,13 +94,7 @@ runs:
           anchor="$checkout_ref"
         fi
 
-        if [[ -n "$BASE_HOST_INPUT" ]]; then
-          base_host="$BASE_HOST_INPUT"
-        elif [[ "$CLI_BUILD" == "qa" ]]; then
-          base_host="https://api-qa.startearly.ai"
-        else
-          base_host="https://api.startearly.ai"
-        fi
+        base_host="${BASE_HOST_INPUT:-https://api.startearly.ai}"
 
         {
           echo "checkout_ref=$checkout_ref"
@@ -134,22 +114,9 @@ runs:
       with:
         node-version: 20
 
-    - name: Configure GitHub Packages registry (QA only)
-      if: ${{ inputs.cli-build == 'qa' }}
-      uses: actions/setup-node@v4
-      with:
-        registry-url: 'https://npm.pkg.github.com'
-        scope: '@earlyai'
-        always-auth: true
-
     - name: Install @earlyai/cli
       shell: bash
-      env:
-        NODE_AUTH_TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
-        CLI_BUILD: ${{ inputs.cli-build }}
-      run: |
-        TAG=$([[ "$CLI_BUILD" == "qa" ]] && echo "qa" || echo "latest")
-        npm install -g "@earlyai/cli@$TAG"
+      run: npm install -g @earlyai/cli@latest
 
     - name: Run early ${{ steps.validate.outputs.command }}
       id: run-cli
@@ -158,7 +125,7 @@ runs:
         COMMAND: ${{ steps.validate.outputs.command }}
         LOG_CONSOLE: "true"
         API_KEY: ${{ inputs.api-key }}
-        TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
+        TOKEN: ${{ github.token }}
         BASE_HOST: ${{ steps.resolve.outputs.base_host }}
         NODE_OPTIONS: ${{ inputs.node-options }}
         REF_NAME: ${{ steps.resolve.outputs.ref_name }}
