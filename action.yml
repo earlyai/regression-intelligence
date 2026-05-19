@@ -16,7 +16,7 @@ inputs:
     required: false
     default: 'prod'
   github-token:
-    description: 'Token used to read @earlyai/cli from GitHub Packages (requires read:packages). Defaults to github.token, which only works for repos with access to the @earlyai org packages; external consumers must pass a PAT.'
+    description: 'Token used to read @earlyai/cli from GitHub Packages (requires read:packages). Only needed for cli-build: qa. Prod installs from the public npm registry. Defaults to github.token; external QA consumers must pass a PAT.'
     required: false
     default: ''
   compare_branch:
@@ -129,22 +129,24 @@ runs:
         ref: ${{ steps.resolve.outputs.checkout_ref }}
         fetch-depth: 0
 
-    - name: Setup Node.js (v20) with @earlyai scope on GitHub Packages
+    - name: Setup Node.js (v20)
       uses: actions/setup-node@v4
       with:
         node-version: 20
-        registry-url: 'https://npm.pkg.github.com'
-        scope: '@earlyai'
-        always-auth: true
 
     - name: Install @earlyai/cli
       shell: bash
       env:
-        NODE_AUTH_TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
         CLI_BUILD: ${{ inputs.cli-build }}
+        GH_TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
       run: |
-        TAG=$([[ "$CLI_BUILD" == "qa" ]] && echo "qa" || echo "latest")
-        npm install -g "@earlyai/cli@$TAG"
+        if [[ "$CLI_BUILD" == "qa" ]]; then
+          echo "@earlyai:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=$GH_TOKEN" >> ~/.npmrc
+          npm install -g @earlyai/cli@qa
+        else
+          npm install -g @earlyai/cli@latest
+        fi
 
     - name: Run early ${{ steps.validate.outputs.command }}
       id: run-cli

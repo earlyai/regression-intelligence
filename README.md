@@ -95,7 +95,7 @@ Both shorthand (`catalog`, `impact`) and long-form (`generate-catalog`, `generat
 | `command` | Yes | | `catalog` or `impact` |
 | `api-key` | Yes | | EarlyAI API key |
 | `cli-build` | No | `prod` | `qa` or `prod` |
-| `github-token` | No | `github.token` | Token for GitHub Packages (`read:packages`). External consumers must pass a PAT. |
+| `github-token` | No | `github.token` | Token for GitHub Packages (`read:packages`). Only needed for `qa` builds; `prod` installs from the public npm registry. |
 | `compare_branch` | No | | Branch to analyze. Required for `impact`. |
 | `label` | No | | Human-readable label for the run. Used by `impact`. |
 | `anchor_branch` | No | | `impact`: base branch to compare against (default: `master`). `catalog`: branch/tag to checkout (default: triggering ref). |
@@ -120,7 +120,7 @@ The example workflow expects these repository secrets:
 |--------|-------------|
 | `EARLY_AGENT_API_KEY_QA` | EarlyAI API key for the QA environment. |
 | `EARLY_AGENT_API_KEY_PROD` | EarlyAI API key for the production environment. |
-| `GITHUB_TOKEN` | Automatically provided by GitHub Actions. Used to install `@earlyai/cli` from GitHub Packages. |
+| `GITHUB_TOKEN` | Automatically provided by GitHub Actions. Used to install `@earlyai/cli` from GitHub Packages (QA builds only; prod installs from public npm). |
 
 ## Versioning
 
