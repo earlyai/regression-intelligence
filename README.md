@@ -80,6 +80,8 @@ Both shorthand (`catalog`, `impact`) and long-form (`generate-catalog`, `generat
 |-------|----------|---------|-------------|
 | `command` | Yes | | `catalog` or `impact` |
 | `api-key` | Yes | | EarlyAI API key |
+| `cli-build` | No | `prod` | `qa` or `prod`. Controls which CLI tag and API host to use. |
+| `github-token` | No | | Token for GitHub Packages (`read:packages`). Only needed when `cli-build` is `qa`. |
 | `compare_branch` | No | | Branch to analyze. Required for `impact`. |
 | `label` | No | | Human-readable label for the run. Used by `impact`. |
 | `anchor_branch` | No | | `impact`: base branch to compare against (default: `master`). `catalog`: branch/tag to checkout (default: triggering ref). |
@@ -87,7 +89,7 @@ Both shorthand (`catalog`, `impact`) and long-form (`generate-catalog`, `generat
 | `job-id` | No | | Job ID passed to the CLI as `EARLY_JOB_ID`. |
 | `project-id` | No | | Project UUID (debug metadata). |
 | `project-root-path` | No | | Project logical root path (debug metadata). |
-| `base-host` | No | | API base host override. Defaults to `https://api.startearly.ai`. |
+| `base-host` | No | | API base host override. Derived from `cli-build` if omitted. |
 | `node-options` | No | `--max-old-space-size=5120` | `NODE_OPTIONS` passed to the CLI. |
 
 ## Outputs
