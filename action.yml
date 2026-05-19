@@ -1,26 +1,26 @@
 name: 'EarlyAI CLI - Generate Impact or Catalog'
-description: 'Composite action that runs the EarlyAI CLI generate-impact or generate-catalog command.'
+description: 'Composite action that runs the EarlyAI CLI impact or catalog command.'
 branding:
   icon: 'package'
   color: 'blue'
 
 inputs:
   command:
-    description: 'Which CLI command to run: generate-impact or generate-catalog.'
+    description: 'Which CLI command to run: catalog (or generate-catalog), impact (or generate-impact).'
     required: true
   api-key:
-    description: 'EarlyAI API key for the chosen environment (QA or Prod).'
+    description: 'EarlyAI API key.'
     required: true
   cli-build:
     description: 'Which CLI build to install: qa or prod.'
     required: false
     default: 'prod'
   github-token:
-    description: 'Token used to read @earlyai/cli from GitHub Packages (requires read:packages). Defaults to github.token, which only works for repos with access to the @earlyai org packages; external consumers must pass a PAT.'
+    description: 'Token for GitHub Packages (read:packages). Only needed when cli-build is qa.'
     required: false
     default: ''
   compare_branch:
-    description: 'Branch to analyze. Required when command is generate-impact.'
+    description: 'Branch to analyze. Required when command is impact (or generate-impact).'
     required: false
     default: ''
   label:
@@ -28,7 +28,7 @@ inputs:
     required: false
     default: ''
   anchor_branch:
-    description: 'generate-impact: base branch to compare against (default: master). generate-catalog: branch or tag to checkout and analyze (default: github.ref_name).'
+    description: 'impact: base branch to compare against (default: master). catalog: branch or tag to checkout and analyze (default: github.ref_name).'
     required: false
     default: ''
   catalog-id:
@@ -48,7 +48,7 @@ inputs:
     required: false
     default: ''
   base-host:
-    description: 'API base host. If omitted, derived from cli-build (qa -> https://api-qa.startearly.ai, prod -> https://api.startearly.ai).'
+    description: 'API base host override. Defaults to https://api.startearly.ai.'
     required: false
     default: ''
   node-options:
@@ -64,7 +64,8 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Validate inputs
+    - name: Validate and normalize inputs
+      id: validate
       shell: bash
       env:
         COMMAND: ${{ inputs.command }}
@@ -72,8 +73,9 @@ runs:
         COMPARE_BRANCH: ${{ inputs.compare_branch }}
       run: |
         case "$COMMAND" in
-          generate-impact|generate-catalog) ;;
-          *) echo "::error::Invalid command '$COMMAND'. Must be 'generate-impact' or 'generate-catalog'." ; exit 1 ;;
+          catalog|generate-catalog) COMMAND="generate-catalog" ;;
+          impact|generate-impact)   COMMAND="generate-impact" ;;
+          *) echo "::error::Invalid command '$COMMAND'. Must be 'catalog', 'impact', 'generate-catalog', or 'generate-impact'." ; exit 1 ;;
         esac
         case "$CLI_BUILD" in
           qa|prod) ;;
@@ -83,12 +85,13 @@ runs:
           echo "::error::'compare_branch' is required when command is 'generate-impact'."
           exit 1
         fi
+        echo "command=$COMMAND" >> "$GITHUB_OUTPUT"
 
     - name: Resolve refs and host
       id: resolve
       shell: bash
       env:
-        COMMAND: ${{ inputs.command }}
+        COMMAND: ${{ steps.validate.outputs.command }}
         COMPARE_BRANCH: ${{ inputs.compare_branch }}
         ANCHOR_BRANCH: ${{ inputs.anchor_branch }}
         DEFAULT_REF: ${{ github.ref_name }}
@@ -126,33 +129,33 @@ runs:
         ref: ${{ steps.resolve.outputs.checkout_ref }}
         fetch-depth: 0
 
-    - name: Setup Node.js (v20) with @earlyai scope on GitHub Packages
+    - name: Setup Node.js (v20)
       uses: actions/setup-node@v4
       with:
         node-version: 20
+
+    - name: Configure GitHub Packages registry (QA only)
+      if: ${{ inputs.cli-build == 'qa' }}
+      uses: actions/setup-node@v4
+      with:
         registry-url: 'https://npm.pkg.github.com'
         scope: '@earlyai'
         always-auth: true
 
-    - name: Install @earlyai/cli@qa
-      if: ${{ inputs.cli-build == 'qa' }}
+    - name: Install @earlyai/cli
       shell: bash
       env:
         NODE_AUTH_TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
-      run: npm install -g @earlyai/cli@qa
+        CLI_BUILD: ${{ inputs.cli-build }}
+      run: |
+        TAG=$([[ "$CLI_BUILD" == "qa" ]] && echo "qa" || echo "latest")
+        npm install -g "@earlyai/cli@$TAG"
 
-    - name: Install @earlyai/cli@latest
-      if: ${{ inputs.cli-build == 'prod' }}
-      shell: bash
-      env:
-        NODE_AUTH_TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
-      run: npm install -g @earlyai/cli@latest
-
-    - name: Run early ${{ inputs.command }}
+    - name: Run early ${{ steps.validate.outputs.command }}
       id: run-cli
       shell: bash
       env:
-        COMMAND: ${{ inputs.command }}
+        COMMAND: ${{ steps.validate.outputs.command }}
         LOG_CONSOLE: "true"
         API_KEY: ${{ inputs.api-key }}
         TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}

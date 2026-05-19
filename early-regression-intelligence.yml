@@ -1,0 +1,56 @@
+name: Early Regression Intelligence
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "catalog or impact"
+        required: true
+        type: string
+      anchor_branch:
+        description: "Baseline branch/tag"
+        required: true
+      compare_branch:
+        description: "Target to analyze (impact only)"
+        required: false
+        default: ""
+      label:
+        description: "Display label for the run (impact only)"
+        required: false
+        default: ""
+      catalog-id:
+        description: "Existing catalog id to reuse/sync (optional)"
+        required: false
+        default: ""
+      job-id:
+        description: "Dispatch job identifier (set by backend; updates an existing workflow run)"
+        required: false
+        default: ""
+      project-id:
+        description: "Resolved project UUID (debug meta — not used by agent logic)"
+        required: false
+        default: ""
+      project-root-path:
+        description: "Project logical root path, e.g. ./apps/call-graph (debug meta — not used by agent logic)"
+        required: false
+        default: ""
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run EarlyAI ${{ inputs.command }}
+        uses: earlyai/regression-intelligence@v1
+        with:
+          command: ${{ inputs.command }}
+          api-key: ${{ secrets.EARLY_AGENT_API_KEY }}
+          anchor_branch: ${{ inputs.anchor_branch }}
+          compare_branch: ${{ inputs.compare_branch }}
+          label: ${{ inputs.label }}
+          catalog-id: ${{ inputs.catalog-id }}
+          job-id: ${{ inputs.job-id }}
+          project-id: ${{ inputs.project-id }}
+          project-root-path: ${{ inputs.project-root-path }}
