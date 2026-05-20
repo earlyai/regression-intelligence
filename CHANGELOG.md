@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/earlyai/regression-intelligence/compare/v1.3.0...v1.4.0) (2026-05-20)
+
+
+### Features
+
+* switch action to process-job CLI command ([41c80e6](https://github.com/earlyai/regression-intelligence/commit/41c80e67440fcee2163db85af54856788aa04ad1))
+* switch action to process-job CLI command ([373e595](https://github.com/earlyai/regression-intelligence/commit/373e595a5a9d0605a3bb88372c78456644343319))
+
 ## [1.3.0](https://github.com/earlyai/regression-intelligence/compare/v1.2.0...v1.3.0) (2026-05-19)
 
 
