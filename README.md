@@ -1,6 +1,6 @@
 # EarlyAI Regression Intelligence
 
-GitHub Action that runs the EarlyAI CLI to generate code catalogs and impact analyses.
+GitHub Action that runs the EarlyAI CLI to process regression jobs.
 
 ## Usage
 
@@ -15,35 +15,8 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      command:
-        description: "catalog or impact"
-        required: true
-        type: string
-      anchor_branch:
-        description: "Baseline branch/tag"
-        required: true
-      compare_branch:
-        description: "Target to analyze (impact only)"
-        required: false
-        default: ""
-      label:
-        description: "Display label for the run (impact only)"
-        required: false
-        default: ""
-      catalog-id:
-        description: "Existing catalog id to reuse/sync (optional)"
-        required: false
-        default: ""
       job-id:
         description: "Dispatch job identifier (set by backend)"
-        required: false
-        default: ""
-      project-id:
-        description: "Resolved project UUID (debug meta)"
-        required: false
-        default: ""
-      project-root-path:
-        description: "Project logical root path, e.g. ./apps/call-graph (debug meta)"
         required: false
         default: ""
 
@@ -51,52 +24,22 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - name: Run EarlyAI ${{ inputs.command }}
+      - name: Run EarlyAI
         uses: earlyai/regression-intelligence@v1
         with:
-          command: ${{ inputs.command }}
           api-key: ${{ secrets.EARLY_AGENT_API_KEY }}
-          anchor_branch: ${{ inputs.anchor_branch }}
-          compare_branch: ${{ inputs.compare_branch }}
-          label: ${{ inputs.label }}
-          catalog-id: ${{ inputs.catalog-id }}
           job-id: ${{ inputs.job-id }}
-          project-id: ${{ inputs.project-id }}
-          project-root-path: ${{ inputs.project-root-path }}
 ```
-
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `catalog` | Generates a code catalog for the given branch or tag. |
-| `impact` | Analyzes the impact of changes on a branch compared to an anchor (base) branch. |
-
-Both shorthand (`catalog`, `impact`) and long-form (`generate-catalog`, `generate-impact`) values are accepted.
 
 ## Inputs
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `command` | Yes | | `catalog` or `impact` |
 | `api-key` | Yes | | EarlyAI API key |
-| `cli-build` | No | `prod` | `qa` or `prod`. Controls which CLI tag and API host to use. |
+| `job-id` | Yes | | Job ID to process. |
+| `cli-build` | No | `prod` | `qa` or `prod`. Controls which CLI tag to install. |
 | `github-token` | No | | Token for GitHub Packages (`read:packages`). Only needed when `cli-build` is `qa`. |
-| `compare_branch` | No | | Branch to analyze. Required for `impact`. |
-| `label` | No | | Human-readable label for the run. Used by `impact`. |
-| `anchor_branch` | No | | `impact`: base branch to compare against (default: `master`). `catalog`: branch/tag to checkout (default: triggering ref). |
-| `catalog-id` | No | | Existing catalog ID to pass to the CLI. |
-| `job-id` | No | | Job ID passed to the CLI as `EARLY_JOB_ID`. |
-| `project-id` | No | | Project UUID (debug metadata). |
-| `project-root-path` | No | | Project logical root path (debug metadata). |
-| `base-host` | No | | API base host override. Derived from `cli-build` if omitted. |
 | `node-options` | No | `--max-old-space-size=5120` | `NODE_OPTIONS` passed to the CLI. |
-
-## Outputs
-
-| Output | Description |
-|--------|-------------|
-| `catalog-id` | Catalog ID captured from CLI output when running `catalog`. |
 
 ## Secrets
 
