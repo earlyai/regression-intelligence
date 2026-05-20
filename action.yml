@@ -5,11 +5,11 @@ branding:
   color: 'blue'
 
 inputs:
-  command:
-    description: 'Which CLI command to run: catalog (or generate-catalog), impact (or generate-impact).'
-    required: true
   api-key:
     description: 'EarlyAI API key.'
+    required: true
+  job-id:
+    description: 'Job id to process.'
     required: true
   cli-build:
     description: 'Which CLI build to install: qa or prod.'
@@ -19,114 +19,18 @@ inputs:
     description: 'Token for GitHub Packages (read:packages). Only needed when cli-build is qa.'
     required: false
     default: ''
-  compare_branch:
-    description: 'Branch to analyze. Required when command is impact (or generate-impact).'
-    required: false
-    default: ''
-  label:
-    description: 'Human-readable label for the run (e.g. PR title). Used by generate-impact.'
-    required: false
-    default: ''
-  anchor_branch:
-    description: 'impact: base branch to compare against (default: master). catalog: branch or tag to checkout and analyze (default: github.ref_name).'
-    required: false
-    default: ''
-  catalog-id:
-    description: 'Existing catalog id to pass to the CLI (exposed as CATALOG_ID).'
-    required: false
-    default: ''
-  job-id:
-    description: 'Existing job id to pass to the CLI (exposed as EARLY_JOB_ID).'
-    required: false
-    default: ''
-  project-id:
-    description: 'Resolved project UUID (debug meta — exposed as EARLY_PROJECT_ID).'
-    required: false
-    default: ''
-  project-root-path:
-    description: 'Project logical root path, e.g. ./apps/call-graph (debug meta — exposed as EARLY_PROJECT_ROOT_PATH).'
-    required: false
-    default: ''
-  base-host:
-    description: 'API base host override. Defaults to https://api.startearly.ai.'
-    required: false
-    default: ''
   node-options:
     description: 'NODE_OPTIONS passed to the CLI.'
     required: false
     default: '--max-old-space-size=5120'
 
-outputs:
-  catalog-id:
-    description: 'Catalog id printed by the CLI when running generate-catalog.'
-    value: ${{ steps.run-cli.outputs.catalog-id }}
 
 runs:
   using: 'composite'
   steps:
-    - name: Validate and normalize inputs
-      id: validate
-      shell: bash
-      env:
-        COMMAND: ${{ inputs.command }}
-        CLI_BUILD: ${{ inputs.cli-build }}
-        COMPARE_BRANCH: ${{ inputs.compare_branch }}
-      run: |
-        case "$COMMAND" in
-          catalog|generate-catalog) COMMAND="generate-catalog" ;;
-          impact|generate-impact)   COMMAND="generate-impact" ;;
-          *) echo "::error::Invalid command '$COMMAND'. Must be 'catalog', 'impact', 'generate-catalog', or 'generate-impact'." ; exit 1 ;;
-        esac
-        case "$CLI_BUILD" in
-          qa|prod) ;;
-          *) echo "::error::Invalid cli-build '$CLI_BUILD'. Must be 'qa' or 'prod'." ; exit 1 ;;
-        esac
-        if [[ "$COMMAND" == "generate-impact" && -z "$COMPARE_BRANCH" ]]; then
-          echo "::error::'compare_branch' is required when command is 'generate-impact'."
-          exit 1
-        fi
-        echo "command=$COMMAND" >> "$GITHUB_OUTPUT"
-
-    - name: Resolve refs and host
-      id: resolve
-      shell: bash
-      env:
-        COMMAND: ${{ steps.validate.outputs.command }}
-        COMPARE_BRANCH: ${{ inputs.compare_branch }}
-        ANCHOR_BRANCH: ${{ inputs.anchor_branch }}
-        DEFAULT_REF: ${{ github.ref_name }}
-        BASE_HOST_INPUT: ${{ inputs.base-host }}
-        CLI_BUILD: ${{ inputs.cli-build }}
-      run: |
-        if [[ "$COMMAND" == "generate-impact" ]]; then
-          checkout_ref="$COMPARE_BRANCH"
-          ref_name="$COMPARE_BRANCH"
-          anchor="${ANCHOR_BRANCH:-master}"
-        else
-          checkout_ref="${ANCHOR_BRANCH:-$DEFAULT_REF}"
-          ref_name="$checkout_ref"
-          anchor="$checkout_ref"
-        fi
-
-        if [[ -n "$BASE_HOST_INPUT" ]]; then
-          base_host="$BASE_HOST_INPUT"
-        elif [[ "$CLI_BUILD" == "qa" ]]; then
-          base_host="https://api-qa.startearly.ai"
-        else
-          base_host="https://api.startearly.ai"
-        fi
-
-        {
-          echo "checkout_ref=$checkout_ref"
-          echo "ref_name=$ref_name"
-          echo "anchor=$anchor"
-          echo "base_host=$base_host"
-        } >> "$GITHUB_OUTPUT"
-
     - name: Checkout target ref
       uses: actions/checkout@v4
       with:
-        ref: ${{ steps.resolve.outputs.checkout_ref }}
         fetch-depth: 0
 
     - name: Setup Node.js (v20)
@@ -151,34 +55,14 @@ runs:
         TAG=$([[ "$CLI_BUILD" == "qa" ]] && echo "qa" || echo "latest")
         npm install -g "@earlyai/cli@$TAG"
 
-    - name: Run early ${{ steps.validate.outputs.command }}
+    - name: Run early process-job
       id: run-cli
       shell: bash
       env:
-        COMMAND: ${{ steps.validate.outputs.command }}
         LOG_CONSOLE: "true"
         API_KEY: ${{ inputs.api-key }}
         TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
-        BASE_HOST: ${{ steps.resolve.outputs.base_host }}
-        NODE_OPTIONS: ${{ inputs.node-options }}
-        REF_NAME: ${{ steps.resolve.outputs.ref_name }}
-        COMPARE_BRANCH: ${{ inputs.compare_branch }}
-        LABEL: ${{ inputs.label }}
-        ANCHOR_BRANCH: ${{ steps.resolve.outputs.anchor }}
-        CATALOG_ID: ${{ inputs.catalog-id }}
         EARLY_JOB_ID: ${{ inputs.job-id }}
-        EARLY_PROJECT_ID: ${{ inputs.project-id }}
-        EARLY_PROJECT_ROOT_PATH: ${{ inputs.project-root-path }}
+        NODE_OPTIONS: ${{ inputs.node-options }}
       run: |
-        set -o pipefail
-        log_file="$(mktemp)"
-        early "$COMMAND" 2>&1 | tee "$log_file"
-        if [[ "$COMMAND" == "generate-catalog" ]]; then
-          catalog_id=$(grep -oiE 'catalog id:[[:space:]]*[0-9a-z]{20,40}' "$log_file" | tail -n1 | awk '{print $NF}')
-          if [[ -n "$catalog_id" ]]; then
-            echo "catalog-id=$catalog_id" >> "$GITHUB_OUTPUT"
-            echo "Captured catalog-id=$catalog_id"
-          else
-            echo "::warning::generate-catalog did not print a 'catalog id: <id>' line; catalog-id output will be empty."
-          fi
-        fi
+        early process-job
