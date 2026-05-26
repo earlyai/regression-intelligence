@@ -53,7 +53,7 @@ runs:
         CLI_BUILD: ${{ inputs.cli-build }}
       run: |
         TAG=$([[ "$CLI_BUILD" == "qa" ]] && echo "qa" || echo "latest")
-        npm install -g "@earlyai/cli@$TAG"
+        npm install -g "@earlyai/cli@$TAG" --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
 
     - name: Run early process-job
       id: run-cli
