@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.1](https://github.com/earlyai/regression-intelligence/compare/v1.4.0...v1.4.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* add npm fetch retry flags for transient network errors ([3e790db](https://github.com/earlyai/regression-intelligence/commit/3e790db78fb733bafb8aa850301c594922fc6306))
+* add npm fetch retry flags to handle transient network errors ([af303fa](https://github.com/earlyai/regression-intelligence/commit/af303fa01223d10a3601433a06c5f6044ab9ff1e))
+
 ## [1.4.0](https://github.com/earlyai/regression-intelligence/compare/v1.3.0...v1.4.0) (2026-05-20)
 
 
