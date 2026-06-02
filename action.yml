@@ -52,7 +52,7 @@ runs:
         NODE_AUTH_TOKEN: ${{ inputs.github-token != '' && inputs.github-token || github.token }}
         CLI_BUILD: ${{ inputs.cli-build }}
       run: |
-        TAG=$([[ "$CLI_BUILD" == "qa" ]] && echo "qa" || echo "latest")
+        TAG=$([[ "$CLI_BUILD" == *"-qa"* ]] && echo "$CLI_BUILD" || echo "latest")
         npm install -g "@earlyai/cli@$TAG" --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
 
     - name: Run early process-job
