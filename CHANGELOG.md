@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.3](https://github.com/earlyai/regression-intelligence/compare/v1.4.2...v1.4.3) (2026-06-02)
+
+
+### Bug Fixes
+
+* TAG assignment logic for CLI_BUILD ([45e99b9](https://github.com/earlyai/regression-intelligence/commit/45e99b9deff4ae0c40c450f6954bc1ab1e5dc781))
+
 ## [1.4.2](https://github.com/earlyai/regression-intelligence/compare/v1.4.1...v1.4.2) (2026-06-02)
 
 
