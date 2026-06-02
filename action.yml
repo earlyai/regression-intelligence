@@ -39,7 +39,7 @@ runs:
         node-version: 20
 
     - name: Configure GitHub Packages registry (QA only)
-      if: ${{ contains(inputs.cli-build, 'qa') }}
+      if: ${{ inputs.cli-build == 'qa' }}
       uses: actions/setup-node@v4
       with:
         registry-url: 'https://npm.pkg.github.com'
