@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/earlyai/regression-intelligence/compare/v1.4.1...v1.4.2) (2026-06-02)
+
+
+### Bug Fixes
+
+* Update TAG assignment logic in action.yml ([b240f4d](https://github.com/earlyai/regression-intelligence/commit/b240f4da2fa3e13833566d2b6d5d81ca96bf648d))
+
 ## [1.4.1](https://github.com/earlyai/regression-intelligence/compare/v1.4.0...v1.4.1) (2026-05-26)
 
 
