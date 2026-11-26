@@ -29,19 +29,24 @@ runs:
   using: 'composite'
   steps:
     - name: Checkout target ref
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
 
     - name: Setup Node.js (v20)
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: 20
+        # v5 turns on npm caching by itself when the caller's package.json has packageManager,
+        # and fails without a lockfile. This action runs in the caller's checkout, so keep v4's
+        # no-cache behaviour.
+        package-manager-cache: false
 
     - name: Configure GitHub Packages registry (QA only)
       if: ${{ contains(inputs.cli-build, 'qa') }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
+        package-manager-cache: false
         registry-url: 'https://npm.pkg.github.com'
         scope: '@earlyai'
         always-auth: true
