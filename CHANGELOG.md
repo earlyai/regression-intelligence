@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.4](https://github.com/earlyai/regression-intelligence/compare/v1.4.3...v1.4.4) (2026-11-26)
+
+
+### Bug Fixes
+
+* a/Amir - move the action off Node 20 ([57ab4aa](https://github.com/earlyai/regression-intelligence/commit/57ab4aaa191fd6d5e91c993be8738b804f8fca23))
+* a/Amir - move the action off Node 20 ([8f9bb57](https://github.com/earlyai/regression-intelligence/commit/8f9bb579c70e290e3183dc4dd2c5d5fb66af0a99))
+
 ## [1.4.3](https://github.com/earlyai/regression-intelligence/compare/v1.4.2...v1.4.3) (2026-06-02)
 
 
